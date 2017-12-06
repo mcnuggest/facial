@@ -1,8 +1,11 @@
-from urllib import parse, request
-import json
-import base64
 import detectFace
+import compareFaces
 
-a=detectFace.returnFaceToken()
+a = detectFace.returnFaceToken("face1.jpg")
 print(a)
+
+b = detectFace.returnFaceToken("face1.jpg")
+print(b)
+
+compareFaces.compareFace(a,b)
 
