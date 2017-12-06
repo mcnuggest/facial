@@ -1,9 +1,8 @@
-import matplotlib.image as image
-import matplotlib.pyplot as plt
-import numpy as np
+from urllib import parse, request
+import json
+import base64
+import detectFace
 
-face1 = image.imread("face1.jpg")
+a=detectFace.returnFaceToken()
+print(a)
 
-plt.imshow(face1)
-plt.axis('off')
-plt.show()
