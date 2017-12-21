@@ -1,6 +1,6 @@
 import detectFace
 import compareFaces
-import gui
+#import gui
 
 # gui()
 
