@@ -1,7 +1,7 @@
 #coding:utf-8
 from numpy import *
 from numpy import linalg as la
-import cv2
+import cv
 import os
 
 def loadImageSet(add):
@@ -10,9 +10,9 @@ def loadImageSet(add):
     for i in os.listdir(add):
         if i.split('.')[1] == 'normal':
             try:
-                img = cv2.imread(add+i,0)
+                img = cv.imread(add+i,0)
             except:
-                print 'load %s failed'%i
+                print('load %s failed'%i)
             FaceMat[j,:] = mat(img).flatten()
             j += 1
     return FaceMat
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
             # 这里的loadname就是我们要识别的未知人脸图，我们通过15张未知人脸找出的对应训练人脸进行对比来求出正确率
             loadname = 'D:\python/face recongnition\YALE\YALE\unpadded\subject'+nameList[i]+'.'+c+'.pgm'
-            judgeImg = cv2.imread(loadname,0)
+            judgeImg = cv.imread(loadname,0)
             if judgeFace(mat(judgeImg).flatten(),FaceVector,avgImg,diffTrain) == int(nameList[i]):
                 count += 1
-        print 'accuracy of %s is %f'%(c, float(count)/len(nameList))  # 求出正确率
+        print('accuracy of %s is %f'%(c, float(count)/len(nameList)))  # 求出正确率
