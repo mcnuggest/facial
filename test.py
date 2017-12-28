@@ -27,7 +27,7 @@ def ReconginitionVector(selecthr = 0.8):
     #step4: calculate eigenvector of covariance matrix (because covariance matrix will cause memory error)
     eigvals,eigVects = linalg.eig(mat(diffTrain.T*diffTrain))
     eigSortIndex = argsort(-eigvals)
-    for i in xrange(shape(FaceMat)[1]):
+    for i in range(shape(FaceMat)[1]):
         if (eigvals[eigSortIndex[:i]]/eigvals.sum()).sum() >= selecthr:
             eigSortIndex = eigSortIndex[:i]
             break

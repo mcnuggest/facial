@@ -1,8 +1,13 @@
 import detectFace
 import compareFaces
+import cv2
 #import gui
 
 # gui()
+img = cv2.imread("face1.jpg")
+cv2.imshow("Image",img)
+cv2.waitKey(0)
+
 
 
 
