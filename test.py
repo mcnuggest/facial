@@ -1,66 +1,74 @@
-#coding:utf-8
-from numpy import *
-from numpy import linalg as la
-import cv
-import os
+# encoding: utf-8
+import urllib2
+import urllib
+import datetime
+import re
+import os.path
 
-def loadImageSet(add):
-    FaceMat = mat(zeros((15,98*116)))
-    j =0
-    for i in os.listdir(add):
-        if i.split('.')[1] == 'normal':
-            try:
-                img = cv.imread(add+i,0)
-            except:
-                print('load %s failed'%i)
-            FaceMat[j,:] = mat(img).flatten()
-            j += 1
-    return FaceMat
+to_find_string="https://bd.phncdn.com/videos/"
+big_path=""
 
-def ReconginitionVector(selecthr = 0.8):
-    # step1: load the face image data ,get the matrix consists of all image
-    FaceMat = loadImageSet('D:\python/face recongnition\YALE\YALE\unpadded/').T
-    # step2: average the FaceMat
-    avgImg = mean(FaceMat,1)
-    # step3: calculate the difference of avgimg and all image data(FaceMat)
-    diffTrain = FaceMat-avgImg
-    #step4: calculate eigenvector of covariance matrix (because covariance matrix will cause memory error)
-    eigvals,eigVects = linalg.eig(mat(diffTrain.T*diffTrain))
-    eigSortIndex = argsort(-eigvals)
-    for i in range(shape(FaceMat)[1]):
-        if (eigvals[eigSortIndex[:i]]/eigvals.sum()).sum() >= selecthr:
-            eigSortIndex = eigSortIndex[:i]
+def save_file(this_download_url,path):
+    print"- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+    time1=datetime.datetime.now()
+    print str(time1)[:-7],
+    if (os.path.isfile(path)):
+        file_size=os.path.getsize(path)/1024/1024
+        print "File "+path+" ("+ str(file_size)+"Mb) already exists."
+        return
+    else:
+        print "Downloading "+path+"..."
+        f = urllib2.urlopen(this_download_url)
+        data = f.read()
+        with open(path, "wb") as code:
+            code.write(data)
+        time2=datetime.datetime.now()
+        print str(time2)[:-7],
+        print path+" Done."
+        use_time=time2-time1
+        print "Time used: "+str(use_time)[:-7]+", ",
+        file_size=os.path.getsize(path)/1024/1024
+        print "File size: "+str(file_size)+" MB, Speed: "+str(file_size/(use_time.total_seconds()))[:4]+"MB/s"
+
+
+def download_the_av(url):
+    req = urllib2.Request(url)
+    content = urllib2.urlopen(req).read()
+    while len(content)<100:
+        print"try again..."
+        content = urllib2.urlopen(req).read()
+    print "All length:" +str(len(content))
+
+    title_begin=content.find("<title>")
+    title_end=content.find("</title>")
+    title=content[title_begin+7:title_end-14]
+    title=title.replace('/','_')
+
+    quality=['720','480','240']
+    for i in quality:
+        find_position=content.find("\"quality\":\""+i+"\"")
+        if find_position>0:
+            print "Quality: "+i+"P"
             break
-    covVects = diffTrain * eigVects[:,eigSortIndex] # covVects is the eigenvector of covariance matrix
-    # avgImg 是均值图像，covVects是协方差矩阵的特征向量，diffTrain是偏差矩阵
-    return avgImg,covVects,diffTrain
+    to_find=content[find_position:find_position+4000]
 
-def judgeFace(judgeImg,FaceVector,avgImg,diffTrain):
-    diff = judgeImg.T - avgImg
-    weiVec = FaceVector.T* diff
-    res = 0
-    resVal = inf
-    for i in range(15):
-        TrainVec = FaceVector.T*diffTrain[:,i]
-        if  (array(weiVec-TrainVec)**2).sum() < resVal:
-            res =  i
-            resVal = (array(weiVec-TrainVec)**2).sum()
-    return res+1
+    pattern=re.compile(r"\"videoUrl\":\"[^\"]*\"")
+    match = pattern.search(to_find)
+    if match:
+        the_url=match.group()
+    the_url=the_url[12:-1]#the real url
+    the_url=the_url.replace("\\/","/")
+    save_file(the_url,big_path+title+".mp4")
 
-if __name__ == '__main__':
 
-    avgImg,FaceVector,diffTrain = ReconginitionVector(selecthr = 0.9)
-    nameList = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15']
-    characteristic = ['centerlight','glasses','happy','leftlight','noglasses','rightlight','sad','sleepy','surprised','wink']
 
-    for c in characteristic:
+urls=["https://www.pornhub.com/view_video.php?viewkey=ph592ef8731630a"]
+print len(urls),
+print " videos to download..."
+count=0
 
-        count = 0
-        for i in range(len(nameList)):
-
-            # 这里的loadname就是我们要识别的未知人脸图，我们通过15张未知人脸找出的对应训练人脸进行对比来求出正确率
-            loadname = 'D:\python/face recongnition\YALE\YALE\unpadded\subject'+nameList[i]+'.'+c+'.pgm'
-            judgeImg = cv.imread(loadname,0)
-            if judgeFace(mat(judgeImg).flatten(),FaceVector,avgImg,diffTrain) == int(nameList[i]):
-                count += 1
-        print('accuracy of %s is %f'%(c, float(count)/len(nameList)))  # 求出正确率
+for url in urls:
+    print count
+    count+=1
+    download_the_av(url)
+print "All done"

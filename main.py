@@ -3,10 +3,18 @@ import compareFaces
 import cv2
 #import gui
 
-# gui()
+def LBP(FaceMat, R=2, P=8):
+    cv2.imshow("Image", FaceMat)
+    im_gray = cv2.cvtColor(FaceMat, cv2.COLOR_BGR2GRAY)
+
+
+
+
 img = cv2.imread("face1.jpg")
-cv2.imshow("Image",img)
-cv2.waitKey(0)
+
+LBP(img)
+
+
 
 
 
